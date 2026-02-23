@@ -1,7 +1,8 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
-import { SessionInput } from '../types';
+import { SessionInput, Location } from '../types';
+import AddLocationModal from '../components/AddLocationModal';
 
 export default function SessionForm() {
     const { id } = useParams<{ id: string }>();
@@ -22,9 +23,20 @@ export default function SessionForm() {
     const [fetching, setFetching] = useState(isEditing);
     const [error, setError] = useState('');
 
+    // Location dropdown state
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [showAddLocation, setShowAddLocation] = useState(false);
+
     // Duration helper state (hours + minutes)
     const [durHours, setDurHours] = useState(0);
     const [durMins, setDurMins] = useState(0);
+
+    // Fetch locations on mount
+    useEffect(() => {
+        api.getLocations()
+            .then(setLocations)
+            .catch(e => console.error('Failed to load locations:', e));
+    }, []);
 
     useEffect(() => {
         if (isEditing && id) {
@@ -121,13 +133,23 @@ export default function SessionForm() {
 
                     <div className="form-group full-width">
                         <label htmlFor="location">Location</label>
-                        <input
+                        <select
                             id="location"
-                            type="text"
                             value={form.location}
-                            onChange={e => handleChange('location', e.target.value)}
-                            placeholder="e.g. Bellagio, Home Game"
-                        />
+                            onChange={e => {
+                                if (e.target.value === '__add_new__') {
+                                    setShowAddLocation(true);
+                                } else {
+                                    handleChange('location', e.target.value);
+                                }
+                            }}
+                        >
+                            <option value="">Select a location…</option>
+                            {locations.map(loc => (
+                                <option key={loc.id} value={loc.name}>{loc.name}</option>
+                            ))}
+                            <option value="__add_new__">➕ Add new location…</option>
+                        </select>
                     </div>
 
                     <div className="form-group">
@@ -226,6 +248,17 @@ export default function SessionForm() {
                     <Link to="/sessions" className="btn btn-secondary">Cancel</Link>
                 </div>
             </form>
+
+            {showAddLocation && (
+                <AddLocationModal
+                    onCreated={(location) => {
+                        setLocations(prev => [...prev, location].sort((a, b) => a.name.localeCompare(b.name)));
+                        handleChange('location', location.name);
+                        setShowAddLocation(false);
+                    }}
+                    onClose={() => setShowAddLocation(false)}
+                />
+            )}
         </div>
     );
 }

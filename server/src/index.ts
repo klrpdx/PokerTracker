@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import sessionRoutes from './routes/sessions';
+import locationRoutes from './routes/locations';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api', sessionRoutes);
+app.use('/api', locationRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

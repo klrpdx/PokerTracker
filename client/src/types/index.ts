@@ -1,3 +1,8 @@
+export interface Location {
+    id: number;
+    name: string;
+}
+
 export interface Session {
     id: number;
     date: string;

@@ -1,4 +1,4 @@
-import { Session, SessionInput, SessionStats } from '../types';
+import { Location, Session, SessionInput, SessionStats } from '../types';
 
 const BASE_URL = '/api';
 
@@ -37,4 +37,12 @@ export const api = {
         }),
 
     getStats: () => request<SessionStats>('/stats'),
+
+    getLocations: () => request<Location[]>('/locations'),
+
+    createLocation: (name: string) =>
+        request<Location>('/locations', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+        }),
 };

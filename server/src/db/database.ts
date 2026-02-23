@@ -6,24 +6,24 @@ const DB_PATH = path.join(__dirname, '..', '..', 'data', 'poker.db');
 let db: Database.Database;
 
 export function getDb(): Database.Database {
-    if (!db) {
-        // Ensure data directory exists
-        const fs = require('fs');
-        const dir = path.dirname(DB_PATH);
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-
-        db = new Database(DB_PATH);
-        db.pragma('journal_mode = WAL');
-        db.pragma('foreign_keys = ON');
-        initializeDb(db);
+  if (!db) {
+    // Ensure data directory exists
+    const fs = require('fs');
+    const dir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
-    return db;
+
+    db = new Database(DB_PATH);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
+    initializeDb(db);
+  }
+  return db;
 }
 
 function initializeDb(db: Database.Database): void {
-    db.exec(`
+  db.exec(`
     CREATE TABLE IF NOT EXISTS sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       date TEXT NOT NULL,
@@ -34,6 +34,13 @@ function initializeDb(db: Database.Database): void {
       duration_minutes INTEGER NOT NULL DEFAULT 0,
       notes TEXT DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS locations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
     )
   `);
 }
